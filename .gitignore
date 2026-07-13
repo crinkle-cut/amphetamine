@@ -29,3 +29,6 @@ bin/
 run/
 
 /PERFORMANCE_AUDIT.md
+
+# macos
+.DS_Store
