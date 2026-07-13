@@ -22,6 +22,9 @@ unlike smoothbeta, amphetamine only uses OpenGL functions <=2.1 to optimize rend
 ![amphetamine (1000 fps)](screenshots/amphetamine.png)
 ###### (test was done on a remote server, exact same settings. both samples were given 15 seconds of load time before recording result)
 </details>
+
+#### recommended mods
+* [LegacyFix](https://github.com/betacraftuk/legacyfix)
 <br>
 
 **warning: amphetamine heavily rewrites minecraft rendering. amphetamine may not be compatible with mods that also modify rendering. your mileage may vary.**
