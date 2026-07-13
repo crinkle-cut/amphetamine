@@ -59,6 +59,16 @@ abstract class TessellatorMixin implements SmoothTessellator {
         return amphetamine_renderingTerrain;
     }
 
+    @Override
+    @Unique
+    public void amphetamine_appendTerrainQuad(int[] vertexData) {
+        amphetamine_copyTerrainQuad(vertexData, buffer, bufferPosition);
+        bufferPosition += amphetamine_TERRAIN_VERTEX_SIZE * 4;
+        addedVertexCount += 4;
+        vertexCount += 4;
+        amphetamine_flushTerrainIfFull();
+    }
+
     @Inject(
             method = "draw",
             at = @At(
@@ -96,10 +106,21 @@ abstract class TessellatorMixin implements SmoothTessellator {
         bufferPosition += amphetamine_TERRAIN_VERTEX_SIZE;
         ++vertexCount;
 
+        amphetamine_flushTerrainIfFull();
+        ci.cancel();
+    }
+
+    @Unique
+    private void amphetamine_flushTerrainIfFull() {
         if (vertexCount % 4 == 0 && bufferPosition >= bufferSize - amphetamine_TERRAIN_VERTEX_SIZE * 4) {
             draw();
             drawing = true;
         }
-        ci.cancel();
+    }
+
+    @Unique
+    private static void amphetamine_copyTerrainQuad(int[] source, int[] destination, int destinationPosition) {
+        for (int vertex = 0; vertex < 4; ++vertex)
+            System.arraycopy(source, vertex * 8, destination, destinationPosition + vertex * amphetamine_TERRAIN_VERTEX_SIZE, amphetamine_TERRAIN_VERTEX_SIZE);
     }
 }

@@ -136,8 +136,16 @@ tasks.register('verifyServerChunkCacheMixinPlugin', JavaExec) {
 	mainClass = 'net.mine_diver.amphetamine.mixin.AmphetamineMixinPluginVerification'
 }
 
+tasks.register('verifyTerrainQuadCompaction', JavaExec) {
+	group = 'verification'
+	description = 'Checks that StationAPI quads match the compact terrain vertex format.'
+	dependsOn tasks.named('testClasses')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.mine_diver.amphetamine.mixin.client.multidraw.TessellatorMixinVerification'
+}
+
 tasks.named('check') {
-	dependsOn tasks.named('verifyFrustumIntersection'), tasks.named('verifyServerChunkCacheMixinPlugin')
+	dependsOn tasks.named('verifyFrustumIntersection'), tasks.named('verifyServerChunkCacheMixinPlugin'), tasks.named('verifyTerrainQuadCompaction')
 }
 
 java {

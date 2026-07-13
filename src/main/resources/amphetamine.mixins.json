@@ -17,6 +17,7 @@
     "client.multidraw.GameRendererMixin",
     "client.multidraw.RenderListAccessor",
     "client.multidraw.RenderListMixin",
+    "client.multidraw.compat.StationTessellatorImplMixin",
     "client.multidraw.TessellatorMixin",
     "client.multidraw.WorldRendererMixin",
     "client.multidraw.nop.ChunkRendererMixin"

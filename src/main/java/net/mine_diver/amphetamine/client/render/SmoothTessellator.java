@@ -7,4 +7,6 @@ public interface SmoothTessellator {
 
     boolean amphetamine_isRenderingTerrain();
 
+    void amphetamine_appendTerrainQuad(int[] vertexData);
+
 }
