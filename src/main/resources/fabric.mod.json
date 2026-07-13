@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "smoothbeta",
+  "id": "amphetamine",
   "version": "${version}",
-  "name": "SmoothBeta",
+  "name": "Amphetamine",
   "description": "Additional settings and optimizations for beta that allow for smoother experience!",
   "authors": [
     "mine_diver"
   ],
   "contact": {
-    "homepage": "https://glass-repo.net/repo/mod/smoothbeta",
-    "sources": "https://github.com/mineLdiver/smoothbeta",
-    "issues": "https://github.com/mineLdiver/smoothbeta/issues"
+    "homepage": "https://glass-repo.net/repo/mod/amphetamine",
+    "sources": "https://github.com/mineLdiver/amphetamine",
+    "issues": "https://github.com/mineLdiver/amphetamine/issues"
   },
   "license": "CC0-1.0",
-  "icon": "assets/smoothbeta/icon.png",
+  "icon": "assets/amphetamine/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "net.mine_diver.smoothbeta.client.SmoothBetaClient"
+      "net.mine_diver.amphetamine.client.AmphetamineClient"
     ]
   },
   "mixins": [
-    "smoothbeta.mixins.json"
+    "amphetamine.mixins.json"
   ],
   "depends": {
     "minecraft": "1.0.0-beta.7.3"

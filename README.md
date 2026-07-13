@@ -1,4 +1,6 @@
-# Fabric Example Mod with StationAPI and BIN Mappings for beta 1.7.3 server + client
+# Amphetamine
+
+Additional settings and optimizations for Minecraft Beta 1.7.3 that provide a smoother experience.
 
 ## Setup
 
@@ -10,4 +12,4 @@
 
 ## License
 
-This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
+Amphetamine is available under the CC0 license.

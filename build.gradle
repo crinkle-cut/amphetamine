@@ -120,6 +120,18 @@ tasks.withType(JavaCompile).configureEach {
 	it.options.release = 17
 }
 
+tasks.register('verifyFrustumIntersection', JavaExec) {
+	group = 'verification'
+	description = 'Checks the optimized frustum test against the vanilla eight-corner algorithm.'
+	dependsOn tasks.named('testClasses')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.mine_diver.amphetamine.client.render.FrustumIntersectionVerification'
+}
+
+tasks.named('check') {
+	dependsOn tasks.named('verifyFrustumIntersection')
+}
+
 java {
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
