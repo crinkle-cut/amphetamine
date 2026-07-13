@@ -2,6 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "net.mine_diver.amphetamine.mixin",
+  "plugin": "net.mine_diver.amphetamine.mixin.AmphetamineMixinPlugin",
   "compatibilityLevel": "JAVA_8",
   "client": [
     "client.BlockEntityFrustumCullingMixin",

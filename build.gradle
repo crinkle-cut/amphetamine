@@ -128,8 +128,16 @@ tasks.register('verifyFrustumIntersection', JavaExec) {
 	mainClass = 'net.mine_diver.amphetamine.client.render.FrustumIntersectionVerification'
 }
 
+tasks.register('verifyServerChunkCacheMixinPlugin', JavaExec) {
+	group = 'verification'
+	description = 'Checks that boxed server chunk cache lookups are rewritten to primitive calls.'
+	dependsOn tasks.named('testClasses')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.mine_diver.amphetamine.mixin.AmphetamineMixinPluginVerification'
+}
+
 tasks.named('check') {
-	dependsOn tasks.named('verifyFrustumIntersection')
+	dependsOn tasks.named('verifyFrustumIntersection'), tasks.named('verifyServerChunkCacheMixinPlugin')
 }
 
 java {
