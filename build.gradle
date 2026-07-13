@@ -16,6 +16,14 @@ loom {
 	intermediaryUrl.set("https://maven.glass-launcher.net/babric/babric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
 }
 
+// Loom's experimental decompile cache chokes on ContainerPlayer's anonymous armor Slot
+// (class_277$1): Vineflower emits it as a standalone .java, but CachedJarProcessor expects it
+// nested and throws "Unexpected output". The non-cached path handles it, so disable the cache.
+// ponytail: costs a full re-decompile each genSources run; drop this once Loom fixes the cache.
+tasks.withType(net.fabricmc.loom.task.GenerateSourcesTask).configureEach {
+	useCache = false
+}
+
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because

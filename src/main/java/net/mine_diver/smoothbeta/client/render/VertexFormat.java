@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.lwjgl.opengl.GL11;
 
 import java.util.stream.Collectors;
 
@@ -81,31 +80,6 @@ public class VertexFormat {
                     vertexCount;
                 case LINES -> vertexCount / 4 * 6;
             };
-        }
-    }
-
-    @Environment(value = EnvType.CLIENT)
-    public enum IndexType {
-        BYTE(GL11.GL_UNSIGNED_BYTE, 1),
-        SHORT(GL11.GL_UNSIGNED_SHORT, 2),
-        INT(GL11.GL_UNSIGNED_INT, 4);
-
-        public final int glType;
-        public final int size;
-
-        IndexType(int glType, int size) {
-            this.glType = glType;
-            this.size = size;
-        }
-
-        public static IndexType smallestFor(int indexCount) {
-            if ((indexCount & 0xFFFF0000) != 0) {
-                return INT;
-            }
-            if ((indexCount & 0xFF00) != 0) {
-                return SHORT;
-            }
-            return BYTE;
         }
     }
 }

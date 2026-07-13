@@ -31,6 +31,7 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	private final IntBuffer intData;
 	private final FloatBuffer floatData;
 	private final String name;
+	private boolean dirty = true;
 
 	public GlUniform(String name, int dataType, int count) {
 		this.name = name;
@@ -64,6 +65,7 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	}
 
 	private void markStateDirty() {
+		this.dirty = true;
 	}
 
 	public static int getTypeIndex(String typeName) {
@@ -92,6 +94,11 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	}
 
 	public final void set(float value1, float value2, float value3) {
+		if (Float.compare(this.floatData.get(0), value1) == 0
+				&& Float.compare(this.floatData.get(1), value2) == 0
+				&& Float.compare(this.floatData.get(2), value3) == 0)
+			return;
+
 		this.floatData.position(0);
 		this.floatData.put(0, value1);
 		this.floatData.put(1, value2);
@@ -100,11 +107,7 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	}
 
 	public final void set(Vec3f vector) {
-		this.floatData.position(0);
-		this.floatData.put(0, vector.getX());
-		this.floatData.put(1, vector.getY());
-		this.floatData.put(2, vector.getZ());
-		this.markStateDirty();
+		this.set(vector.getX(), vector.getY(), vector.getZ());
 	}
 
 	public final void setForDataType(float value1, float value2, float value3, float value4) {
@@ -142,6 +145,9 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	}
 
 	public final void set(int value) {
+		if (this.intData.get(0) == value)
+			return;
+
 		this.intData.position(0);
 		this.intData.put(0, value);
 		this.markStateDirty();
@@ -160,12 +166,22 @@ public class GlUniform extends Uniform implements AutoCloseable {
 	}
 
 	public final void set(FloatBuffer matrix) {
-		floatData.position(0);
-		floatData.put(matrix);
-		markStateDirty();
+		boolean changed = false;
+		for (int i = 0; i < this.count; ++i) {
+			float value = matrix.get();
+			if (Float.compare(this.floatData.get(i), value) != 0) {
+				this.floatData.put(i, value);
+				changed = true;
+			}
+		}
+		if (changed)
+			this.markStateDirty();
 	}
 
 	public void upload() {
+		if (!this.dirty)
+			return;
+
 		if (this.dataType <= INT4)
 			this.uploadInts();
 		else if (this.dataType <= FLOAT4)
@@ -178,6 +194,7 @@ public class GlUniform extends Uniform implements AutoCloseable {
 
 			this.uploadMatrix();
 		}
+		this.dirty = false;
 	}
 
 	private void uploadInts() {

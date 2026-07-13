@@ -13,7 +13,6 @@ import net.mine_diver.smoothbeta.client.render.gl.*;
 import net.mine_diver.smoothbeta.util.JsonHelper;
 import net.mine_diver.smoothbeta.util.PathUtil;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.opengl.GL13;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -27,19 +26,16 @@ public class Shader implements GlShader, AutoCloseable {
 	private static final String CORE_DIRECTORY = "assets/minecraft/" + MOD_ID + "/shaders/core/";
 	private static final String INCLUDE_DIRECTORY = "assets/minecraft/" + MOD_ID + "/shaders/include/";
 	private static int activeShaderId;
-	private final Map<String, Object> samplers = new HashMap<>();
 	private final List<String> samplerNames = new ArrayList<>();
 	private final IntList loadedSamplerIds = new IntArrayList();
 	private final List<GlUniform> uniforms = new ArrayList<>();
 	private final Map<String, GlUniform> loadedUniforms = new HashMap<>();
 	private final int programId;
 	private final String name;
-	private final GlBlendState blendState;
 	private final Program vertexShader;
 	private final Program fragmentShader;
-	public final GlUniform modelViewMat,
-			projectionMat,
-			fogMode,
+	private boolean samplersInitialized;
+	public final GlUniform fogMode,
 			chunkOffset;
 
 	public Shader(String name, VertexFormat format) throws IOException {
@@ -99,7 +95,6 @@ public class Shader implements GlShader, AutoCloseable {
 					++k;
 				}
 			}
-			this.blendState = Shader.readBlendState(JsonHelper.getObject(jsonObject, "blend", null));
 			this.vertexShader = Shader.loadProgram(Program.Type.VERTEX, string);
 			this.fragmentShader = Shader.loadProgram(Program.Type.FRAGMENT, string2);
 			this.programId = GlProgramManager.createProgram();
@@ -118,8 +113,6 @@ public class Shader implements GlShader, AutoCloseable {
 			shaderParseException4.addFaultyFile(jsonPath);
 			throw shaderParseException4;
 		}
-		this.modelViewMat = this.getUniform("ModelViewMat");
-		this.projectionMat = this.getUniform("ProjMat");
 		this.fogMode = this.getUniform("FogMode");
 		this.chunkOffset = this.getUniform("ChunkOffset");
 	}
@@ -164,58 +157,6 @@ public class Shader implements GlShader, AutoCloseable {
 		return program2;
 	}
 
-	public static GlBlendState readBlendState(JsonObject json) {
-		if (json == null)
-			return new GlBlendState();
-		else {
-			int i = 32774;
-			int j = 1;
-			int k = 0;
-			int l = 1;
-			int m = 0;
-			boolean bl = true;
-			boolean bl2 = false;
-			if (JsonHelper.hasString(json, "func")) {
-				i = GlBlendState.getFuncFromString(json.get("func").getAsString());
-				if (i != 32774)
-					bl = false;
-			}
-
-			if (JsonHelper.hasString(json, "srcrgb")) {
-				j = GlBlendState.getComponentFromString(json.get("srcrgb").getAsString());
-				if (j != 1)
-					bl = false;
-			}
-
-			if (JsonHelper.hasString(json, "dstrgb")) {
-				k = GlBlendState.getComponentFromString(json.get("dstrgb").getAsString());
-				if (k != 0)
-					bl = false;
-			}
-
-			if (JsonHelper.hasString(json, "srcalpha")) {
-				l = GlBlendState.getComponentFromString(json.get("srcalpha").getAsString());
-				if (l != 1)
-					bl = false;
-
-				bl2 = true;
-			}
-
-			if (JsonHelper.hasString(json, "dstalpha")) {
-				m = GlBlendState.getComponentFromString(json.get("dstalpha").getAsString());
-				if (m != 0)
-					bl = false;
-
-				bl2 = true;
-			}
-
-			if (bl)
-				return new GlBlendState();
-			else
-				return bl2 ? new GlBlendState(j, k, l, m, i) : new GlBlendState(j, k, i);
-		}
-	}
-
 	public void close() {
 
 		for (GlUniform glUniform : this.uniforms)
@@ -227,44 +168,19 @@ public class Shader implements GlShader, AutoCloseable {
 	public void unbind() {
 		GlProgramManager.useProgram(0);
 		activeShaderId = -1;
-		int i = GlStateManager._getActiveTexture();
-
-		for (int j = 0; j < this.loadedSamplerIds.size(); ++j)
-			if (this.samplers.get(this.samplerNames.get(j)) != null) {
-				GlStateManager._activeTexture(GL13.GL_TEXTURE0 + j);
-				GlStateManager._bindTexture(0);
-			}
-
-		GlStateManager._activeTexture(i);
 	}
 
 	public void bind() {
-		this.blendState.enable();
 		if (this.programId != activeShaderId) {
 			GlProgramManager.useProgram(this.programId);
 			activeShaderId = this.programId;
 		}
 
-		int i = GlStateManager._getActiveTexture();
-
-		for (int j = 0; j < this.loadedSamplerIds.size(); ++j) {
-			String string = this.samplerNames.get(j);
-			if (this.samplers.get(string) != null) {
-				int k = GlUniform.getUniformLocation(this.programId, string);
-				GlUniform.uniform1(k, j);
-				GlStateManager._activeTexture(GL13.GL_TEXTURE0 + j);
-				GlStateManager._enableTexture();
-				Object object = this.samplers.get(string);
-				int l = -1;
-				if (object instanceof Integer)
-					l = (Integer) object;
-
-				if (l != -1)
-					GlStateManager._bindTexture(l);
-			}
+		if (!this.samplersInitialized) {
+			for (int i = 0; i < this.loadedSamplerIds.size(); ++i)
+				GlUniform.uniform1(this.loadedSamplerIds.getInt(i), i);
+			this.samplersInitialized = true;
 		}
-
-		GlStateManager._activeTexture(i);
 
 		for (GlUniform glUniform : this.uniforms)
 			glUniform.upload();
@@ -285,7 +201,6 @@ public class Shader implements GlShader, AutoCloseable {
 			if (j == -1) {
 				LOGGER.warn("Shader {} could not find sampler named {} in the specified shader program.", this.name,
 						string);
-				this.samplers.remove(string);
 				intList.add(i);
 			} else
 				this.loadedSamplerIds.add(j);
@@ -313,15 +228,7 @@ public class Shader implements GlShader, AutoCloseable {
 	private void readSampler(JsonElement json) {
 		JsonObject jsonObject = JsonHelper.asObject(json, "sampler");
 		String string = JsonHelper.getString(jsonObject, "name");
-		if (!JsonHelper.hasString(jsonObject, "file")) {
-			this.samplers.put(string, null);
-			this.samplerNames.add(string);
-		} else
-			this.samplerNames.add(string);
-	}
-
-	public void addSampler(String name, Object sampler) {
-		this.samplers.put(name, sampler);
+		this.samplerNames.add(string);
 	}
 
 	private void addUniform(JsonElement json) throws ShaderParseException {

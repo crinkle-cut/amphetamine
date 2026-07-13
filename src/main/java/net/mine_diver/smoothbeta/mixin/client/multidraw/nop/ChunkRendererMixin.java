@@ -1,12 +1,42 @@
 package net.mine_diver.smoothbeta.mixin.client.multidraw.nop;
 
 import net.minecraft.client.render.chunk.ChunkBuilder;
+import net.minecraft.util.math.Box;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(ChunkBuilder.class)
 public class ChunkRendererMixin {
+    @Redirect(
+            method = "setPosition",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lorg/lwjgl/opengl/GL11;glNewList(II)V",
+                    remap = false
+            )
+    )
+    private void smoothbeta_nopOcclusionListStart(int list, int mode) {}
+
+    @Redirect(
+            method = "setPosition",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/render/item/ItemRenderer;renderShapeFlat(Lnet/minecraft/util/math/Box;)V"
+            )
+    )
+    private void smoothbeta_nopOcclusionBox(Box box) {}
+
+    @Redirect(
+            method = "setPosition",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lorg/lwjgl/opengl/GL11;glEndList()V",
+                    remap = false
+            )
+    )
+    private void smoothbeta_nopOcclusionListEnd() {}
+
     @Redirect(
             method = "rebuild",
             at = @At(

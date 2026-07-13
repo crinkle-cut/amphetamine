@@ -5,9 +5,7 @@ import net.mine_diver.smoothbeta.client.render.gl.VertexBuffer;
 import net.mine_diver.smoothbeta.mixin.client.multidraw.RenderListAccessor;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.world.ChunkRenderer;
-import net.mine_diver.smoothbeta.util.math.Vec3f;
 
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,6 @@ public class RenderRegion extends ChunkRenderer {
     private final List<VertexBuffer> buffers = new ArrayList<>();
 
     public RenderRegion(WorldRenderer worldRenderer) {
-        _super.smoothbeta_setGlListBuffer(IntBuffer.allocate(0));
         stationWorldRenderer = ((SmoothWorldRenderer) worldRenderer);
     }
 
@@ -49,6 +46,5 @@ public class RenderRegion extends ChunkRenderer {
         for (VertexBuffer vertexBuffer : buffers)
             vertexBuffer.uploadToPool();
         stationWorldRenderer.smoothbeta_getTerrainVboPool().drawAll();
-        chunkOffset.set(Vec3f.ZERO);
     }
 }

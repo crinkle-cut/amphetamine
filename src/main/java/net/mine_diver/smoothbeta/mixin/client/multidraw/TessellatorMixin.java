@@ -75,6 +75,7 @@ abstract class TessellatorMixin implements SmoothTessellator {
             )
     )
     private int smoothbeta_compactVertices(int constant) {
-        return smoothbeta_renderingTerrain ? 7 : 8;
+        // Position (3 ints), UV (2 ints), and packed color (1 int).
+        return smoothbeta_renderingTerrain ? 6 : constant;
     }
 }

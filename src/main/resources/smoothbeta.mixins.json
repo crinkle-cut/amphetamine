@@ -4,11 +4,14 @@
   "package": "net.mine_diver.smoothbeta.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "client.MinecraftAccessor",
     "client.MixinEntityRendererDispatcher",
+    "client.SignBlockEntityRendererMixin",
+    "client.TextRendererMixin",
     "client.MixinTileEntityRenderDispatcher",
     "client.multidraw.ChunkRendererMixin",
+    "client.multidraw.GameRendererMixin",
     "client.multidraw.RenderListAccessor",
+    "client.multidraw.RenderListMixin",
     "client.multidraw.TessellatorMixin",
     "client.multidraw.WorldRendererMixin",
     "client.multidraw.nop.ChunkRendererMixin"
