@@ -6,6 +6,7 @@
   "client": [
     "client.BlockEntityFrustumCullingMixin",
     "client.FrustumDataMixin",
+    "client.HudRenderMixin",
     "client.MixinEntityRendererDispatcher",
     "client.SignBlockEntityRendererMixin",
     "client.SkyVboMixin",
