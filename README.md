@@ -1,6 +1,6 @@
-# amphetamine -- minecraft on illicit substances
+# amphetamine -- beta minecraft on illicit substances
 
-amphetamine is a Babric mod designed for optimizing beta Minecraft rendering on M-series Macs. amphetamine is a fork of SmoothBeta. <br>
+amphetamine is a Babric mod designed for optimizing Minecraft rendering on M-series Macs. amphetamine is a fork of SmoothBeta. <br>
 changes include:
 * overhauled terrain rendering
 * faster frustum culling math
