@@ -54,9 +54,9 @@ class ChunkRendererMixin implements SmoothChunkRenderer {
     private void amphetamine_init(CallbackInfo ci) {
         amphetamine_buffers = new VertexBuffer[renderLayerEmpty.length];
         //noinspection deprecation
-        VboPool pool = ((SmoothWorldRenderer) ((Minecraft) FabricLoader.getInstance().getGameInstance()).worldRenderer).amphetamine_getTerrainVboPool();
+        SmoothWorldRenderer worldRenderer = (SmoothWorldRenderer) ((Minecraft) FabricLoader.getInstance().getGameInstance()).worldRenderer;
         for (int i = 0; i < amphetamine_buffers.length; i++)
-            amphetamine_buffers[i] = new VertexBuffer(pool);
+            amphetamine_buffers[i] = new VertexBuffer(worldRenderer.amphetamine_getTerrainVboPool(i));
     }
 
     @Inject(

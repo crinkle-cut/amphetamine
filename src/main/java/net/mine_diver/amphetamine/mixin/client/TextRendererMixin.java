@@ -27,6 +27,7 @@ abstract class TextRendererMixin implements SmoothTextRenderer {
     public void amphetamine_beginBatch() {
         if (this.amphetamine_batching)
             throw new IllegalStateException("Text batch is already active");
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.boundTexture);
         Tessellator.INSTANCE.startQuads();
         this.amphetamine_batching = true;
     }
@@ -84,10 +85,11 @@ abstract class TextRendererMixin implements SmoothTextRenderer {
         if (alpha == 0)
             alpha = 255;
 
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.boundTexture);
         Tessellator tessellator = Tessellator.INSTANCE;
-        if (!this.amphetamine_batching)
+        if (!this.amphetamine_batching) {
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.boundTexture);
             tessellator.startQuads();
+        }
         amphetamine_setColor(tessellator, color, alpha);
         int cursorX = x;
 
@@ -118,6 +120,23 @@ abstract class TextRendererMixin implements SmoothTextRenderer {
 
         if (!this.amphetamine_batching)
             tessellator.draw();
+    }
+
+    /**
+     * Emits a text shadow and its foreground in one batch.
+     *
+     * @author Nitch
+     * @reason Avoid a second small draw and redundant font-texture bind for every shadowed string.
+     */
+    @Overwrite
+    public void drawWithShadow(String text, int x, int y, int color) {
+        boolean ownsBatch = !this.amphetamine_batching;
+        if (ownsBatch)
+            this.amphetamine_beginBatch();
+        this.draw(text, x + 1, y + 1, color, true);
+        this.draw(text, x, y, color, false);
+        if (ownsBatch)
+            this.amphetamine_endBatch();
     }
 
     @Unique

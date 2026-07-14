@@ -115,12 +115,6 @@ public class VboPool implements AutoCloseable {
             throw new IllegalArgumentException("Mixed region draw modes: " + this.drawMode + " != " + drawMode);
 
         this.drawMode = drawMode;
-        if (this.pageBatching) {
-            range.page.queue(range.position, range.size);
-            ++this.drawRangeCount;
-            return;
-        }
-
         DrawRange drawRange;
         if (this.drawRangeCount == this.drawRanges.size()) {
             drawRange = new DrawRange();
@@ -135,16 +129,8 @@ public class VboPool implements AutoCloseable {
         if (this.drawRangeCount == 0)
             return;
 
-        if (this.pageBatching) {
-            for (Page page : this.pages) {
-                if (page.firsts.position() == 0)
-                    continue;
-                this.bindForDraw(page);
-                page.draw(this.drawMode);
-            }
-            this.drawRangeCount = 0;
-            return;
-        }
+        if (this.pageBatching)
+            this.drawRanges.subList(0, this.drawRangeCount).sort(null);
 
         int drawIndex = 0;
         while (drawIndex < this.drawRangeCount) {
@@ -293,11 +279,8 @@ public class VboPool implements AutoCloseable {
         }
 
         private void queue(int first, int count) {
-            int last = this.firsts.position() - 1;
-            if (last >= 0 && this.firsts.get(last) + this.counts.get(last) == first) {
-                this.counts.put(last, this.counts.get(last) + count);
+            if (mergeTouchingRange(this.firsts, this.counts, first, count))
                 return;
-            }
 
             if (!this.firsts.hasRemaining())
                 this.growDrawBuffers();
@@ -320,7 +303,10 @@ public class VboPool implements AutoCloseable {
         private void draw(VertexFormat.DrawMode drawMode) {
             this.firsts.flip();
             this.counts.flip();
-            GL14.glMultiDrawArrays(drawMode.glMode, this.firsts, this.counts);
+            if (this.firsts.remaining() == 1)
+                GL11.glDrawArrays(drawMode.glMode, this.firsts.get(0), this.counts.get(0));
+            else
+                GL14.glMultiDrawArrays(drawMode.glMode, this.firsts, this.counts);
             this.firsts.clear();
             this.counts.clear();
         }
@@ -334,7 +320,20 @@ public class VboPool implements AutoCloseable {
         }
     }
 
-    private final class DrawRange {
+    static int compareRangeKeys(int leftPage, int leftFirst, int rightPage, int rightFirst) {
+        int pageComparison = Integer.compare(leftPage, rightPage);
+        return pageComparison != 0 ? pageComparison : Integer.compare(leftFirst, rightFirst);
+    }
+
+    static boolean mergeTouchingRange(IntBuffer firsts, IntBuffer counts, int first, int count) {
+        int last = firsts.position() - 1;
+        if (last < 0 || firsts.get(last) + counts.get(last) != first)
+            return false;
+        counts.put(last, counts.get(last) + count);
+        return true;
+    }
+
+    private final class DrawRange implements Comparable<DrawRange> {
         private Page page;
         private int first;
         private int count;
@@ -343,6 +342,11 @@ public class VboPool implements AutoCloseable {
             this.page = page;
             this.first = first;
             this.count = count;
+        }
+
+        @Override
+        public int compareTo(DrawRange other) {
+            return compareRangeKeys(this.page.vertexBufferId, this.first, other.page.vertexBufferId, other.first);
         }
     }
 

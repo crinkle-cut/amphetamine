@@ -61,7 +61,7 @@ abstract class HudRenderMixin {
         if (!this.amphetamine_hudDisplayListReady
                 || renderShapeChanged
                 || now - this.amphetamine_nextHudFrameNanos >= 0L) {
-            GL11.glNewList(this.amphetamine_hudDisplayList, GL11.GL_COMPILE_AND_EXECUTE);
+            GL11.glNewList(this.amphetamine_hudDisplayList, GL11.GL_COMPILE);
             try {
                 hud.render(tickDelta, screenOpen, mouseX, mouseY);
             } finally {
@@ -74,9 +74,9 @@ abstract class HudRenderMixin {
             this.amphetamine_hudGuiScale = this.client.options.guiScale;
             this.amphetamine_hudScreenOpen = screenOpen;
             this.amphetamine_scheduleNextHudFrame(now, renderShapeChanged);
-        } else {
-            GL11.glCallList(this.amphetamine_hudDisplayList);
         }
+
+        GL11.glCallList(this.amphetamine_hudDisplayList);
     }
 
     @Unique

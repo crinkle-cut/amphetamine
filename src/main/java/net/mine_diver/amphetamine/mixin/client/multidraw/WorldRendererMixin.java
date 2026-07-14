@@ -23,7 +23,7 @@ abstract class WorldRendererMixin implements SmoothWorldRenderer {
         private ChunkRenderer[] chunkRenderers;
 
         @Unique
-        private VboPool amphetamine_vboPool;
+        private VboPool[] amphetamine_vboPools;
 
         @ModifyArg(
                         method = "<init>",
@@ -47,24 +47,33 @@ abstract class WorldRendererMixin implements SmoothWorldRenderer {
 
         @Override
         @Unique
-        public VboPool amphetamine_getTerrainVboPool() {
-                return amphetamine_vboPool;
+        public VboPool amphetamine_getTerrainVboPool(int pass) {
+                return amphetamine_vboPools[pass];
         }
 
         @Inject(method = "reload()V", at = @At("HEAD"))
         private void amphetamine_resetVboPool(CallbackInfo ci) {
-                if (amphetamine_vboPool != null)
-                        amphetamine_vboPool.deleteGlBuffers();
-                amphetamine_vboPool = new VboPool(VertexFormats.POSITION_TEXTURE_COLOR);
+                amphetamine_deleteVboPools();
+                amphetamine_vboPools = new VboPool[] {
+                                new VboPool(VertexFormats.POSITION_TEXTURE_COLOR),
+                                new VboPool(VertexFormats.POSITION_TEXTURE_COLOR)
+                };
                 Shaders.getTerrainShader();
         }
 
         @Inject(method = "setWorld", at = @At("HEAD"))
         private void amphetamine_releaseVboPoolOnUnload(net.minecraft.world.World world, CallbackInfo ci) {
-                if (world == null && amphetamine_vboPool != null) {
-                        amphetamine_vboPool.deleteGlBuffers();
-                        amphetamine_vboPool = null;
-                }
+                if (world == null)
+                        amphetamine_deleteVboPools();
+        }
+
+        @Unique
+        private void amphetamine_deleteVboPools() {
+                if (amphetamine_vboPools == null)
+                        return;
+                for (VboPool pool : amphetamine_vboPools)
+                        pool.deleteGlBuffers();
+                amphetamine_vboPools = null;
         }
 
         @Redirect(method = "<init>", at = @At(value = "NEW", target = "()Lnet/minecraft/client/render/world/ChunkRenderer;"))
@@ -77,7 +86,7 @@ abstract class WorldRendererMixin implements SmoothWorldRenderer {
                         int var6, LivingEntity var7, double var8, double var10, double var12, int var14, int var15,
                         ChunkBuilder var16, int var17) {
                 ((RenderRegion) this.chunkRenderers[var17])
-                                .addBuffer(((SmoothChunkRenderer) var16).amphetamine_getBuffer(d));
+                                .addBuffer(((SmoothChunkRenderer) var16).amphetamine_getBuffer(d), d);
         }
 
         @Redirect(method = "renderChunks(IIID)I", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/world/ChunkRenderer;addGlList(I)V"))
@@ -86,7 +95,7 @@ abstract class WorldRendererMixin implements SmoothWorldRenderer {
 
         @Inject(method = "renderLastChunks(ID)V", at = @At("HEAD"))
         public void amphetamine_beforeRenderRegion(int d, double par2, CallbackInfo ci) {
-                amphetamine_vboPool.setPageBatching(d == 0);
+                amphetamine_vboPools[d].setPageBatching(d == 0);
                 Shader shader = Shaders.getTerrainShader();
                 shader.fogMode.set(Shaders.getFogMode());
                 shader.bind();
@@ -94,7 +103,7 @@ abstract class WorldRendererMixin implements SmoothWorldRenderer {
 
         @Inject(method = "renderLastChunks(ID)V", at = @At("RETURN"))
         public void amphetamine_afterRenderRegion(int d, double par2, CallbackInfo ci) {
-                amphetamine_vboPool.finishDrawing();
+                amphetamine_vboPools[d].finishDrawing();
                 Shaders.getTerrainShader().unbind();
         }
 }

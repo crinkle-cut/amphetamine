@@ -144,8 +144,24 @@ tasks.register('verifyTerrainQuadCompaction', JavaExec) {
 	mainClass = 'net.mine_diver.amphetamine.mixin.client.multidraw.TessellatorMixinVerification'
 }
 
+tasks.register('verifyVboPoolCoalescing', JavaExec) {
+	group = 'verification'
+	description = 'Checks opaque VBO range ordering and touching-range coalescing.'
+	dependsOn tasks.named('testClasses')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.mine_diver.amphetamine.client.render.VboPoolVerification'
+}
+
+tasks.register('verifyMacOSXContextUpdateGate', JavaExec) {
+	group = 'verification'
+	description = 'Checks that macOS OpenGL context updates run only for drawable changes and safety refreshes.'
+	dependsOn tasks.named('testClasses')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'net.mine_diver.amphetamine.mixin.client.lwjgl.MacOSXContextUpdateGateVerification'
+}
+
 tasks.named('check') {
-	dependsOn tasks.named('verifyFrustumIntersection'), tasks.named('verifyServerChunkCacheMixinPlugin'), tasks.named('verifyTerrainQuadCompaction')
+	dependsOn tasks.named('verifyFrustumIntersection'), tasks.named('verifyServerChunkCacheMixinPlugin'), tasks.named('verifyTerrainQuadCompaction'), tasks.named('verifyVboPoolCoalescing'), tasks.named('verifyMacOSXContextUpdateGate')
 }
 
 java {

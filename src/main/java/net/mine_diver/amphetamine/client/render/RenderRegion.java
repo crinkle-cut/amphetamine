@@ -14,6 +14,7 @@ public class RenderRegion extends ChunkRenderer {
     private final RenderListAccessor _super = (RenderListAccessor) this;
     private final SmoothWorldRenderer stationWorldRenderer;
     private final List<VertexBuffer> buffers = new ArrayList<>();
+    private int renderPass;
 
     public RenderRegion(WorldRenderer worldRenderer) {
         stationWorldRenderer = ((SmoothWorldRenderer) worldRenderer);
@@ -30,8 +31,9 @@ public class RenderRegion extends ChunkRenderer {
         throw new UnsupportedOperationException("Call lists can't be added to VBO regions!");
     }
 
-    public void addBuffer(VertexBuffer buffer) {
+    public void addBuffer(VertexBuffer buffer, int renderPass) {
         buffers.add(buffer);
+        this.renderPass = renderPass;
     }
 
     public void render() {
@@ -45,6 +47,6 @@ public class RenderRegion extends ChunkRenderer {
         chunkOffset.upload();
         for (VertexBuffer vertexBuffer : buffers)
             vertexBuffer.uploadToPool();
-        stationWorldRenderer.amphetamine_getTerrainVboPool().drawAll();
+        stationWorldRenderer.amphetamine_getTerrainVboPool(renderPass).drawAll();
     }
 }
